@@ -49,10 +49,14 @@ import ftd2xx as FT
 
 import sys
 
+from time import sleep
+
 try:
     import BaseHTTPServer as httpServer
 except:
     import http.server as httpServer
+
+print("TESTING")
 
 crcTable = [
   0x0000,0x1021,0x2042,0x3063,0x4084,0x50A5,0x60C6,0x70E7,
@@ -268,7 +272,7 @@ class MyHttpHandler(httpServer.BaseHTTPRequestHandler):
         f.close()
 
     def do_GET(self):
-        files = ['index.html', 'jquery-1.11.3.js']
+        files = ['index.html', 'jquery-1.9.1.min.js']
         if self.path == '/':
             self.path = '/index.html'
 
@@ -302,8 +306,34 @@ def Main(port):
 
     sensor.close()
 
+def Legit_Main():
+    global sensor
+    sensor = SensorInterface()
+    try:
+        sensor.connect()
+    except:
+        print("Error connecting to sensor")
+        raise
+        return
+
+    while True:
+        try:
+            images = sensor.getAllImages()
+            for image in images:
+                print(image['timeStamp'] / 1000000) 
+        except KeyboardInterrupt:
+            break
+
+    sensor.close()
+
+runningWeb = False
+
 if __name__ == '__main__':
-    port = 8080
-    if len(sys.argv) > 1:
-        port = int(sys.argv[1])
-    Main(port)
+    if runningWeb:
+        port = 8080
+        if len(sys.argv) > 1:
+            port = int(sys.argv[1])
+        print("running server on port " + str(port))
+        Main(port)
+    else:
+        Legit_Main()
