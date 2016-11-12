@@ -25,7 +25,7 @@
         }
         if (diff > 1e6) {
           framesPerSec = frameCount / (diff / 1e6);
-          $("#framesPerSec").text(framesPerSec + " frames/sec");
+          //$("#framesPerSec").text(framesPerSec + " frames/sec");
           lastSequence = seq;
           lastTs = ts;
           frameCount = 0;
@@ -83,6 +83,9 @@
         dispCtx.drawImage(ctx.canvas, 0, 0, cols, rows, 0, 0, dispCanvas.width, dispCanvas.height);
       }
 
+      var wasTouching = false;
+      var points = [];
+
       function requestUpdate() {
         $.getJSON("sensorData", function(json) {
         console.log("BRUH!!!");
@@ -91,15 +94,86 @@
           }
           if (Object.keys(json).length > 0) {
             //$("#rawData").text(JSON.stringify(json, null, 2));
-            console.log(json["image"], json["rows"], json["cols"]);
-
+            //console.log(json["image"], json["rows"], json["cols"]);
             updateFrameRate(json["timeStamp"], json["sequence"]);
             updateCanvas(json["image"], json["rows"], json["cols"]);
+
+            var foundNewMax = getMax(json["image"]).value > 100;
+
+            if (wasTouching) {
+              if (foundNewMax) {
+                //keep recording
+                points.push(getMax(json["image"]).location);
+              } else {
+                //stop recording
+                //process gesture
+
+              }
+            } else { //not touching
+              if (foundNewMax) {
+                //start recording
+                points.push(getMax(json["image"]).location);
+              } else {
+                //do nothing
+              }
+            }
+
+            wasTouching = foundNewMax;
           } else {
-            console.log("you done goofed")
-;          }
+            console.log("you done goofed");
+          }
         });
       }
+
+      function processGesture() {
+        var firstCoord = points[0];
+        var lastCoord = points[points.length - 1];
+        var changeX = lastCoord[0] - firstCoord[0];
+        var changeY = lastCoord[1] - firstCoord[1];
+
+        //check for move up
+        if (changeY < -5 && Math.abs(changeX) < 5) {
+          //scroll up
+        }
+
+        //check for move down
+        if (changeY > 5 && Math.abs(changeX) < 5) {
+          //scroll down
+        }
+
+        //detect for switch up down 
+        for (index in points) {
+          var point = points[index];
+        }
+
+      }
+
+       function getMax(matrix) {
+         var xmax = 0;
+         var ymax = 0;
+         var max = -Infinity;
+         for (var i = 0; i < matrix.length; i++) {
+           for (var j = 0; j < matrix[i].length; j++) {
+             if (matrix[i][j] > max) {
+                xmax = i;
+                ymax = j;
+                max = matrix[i][j];
+             }
+           }
+         }
+         /*console.log("Max value is " + matrix[xmax][ymax] + " at coordinate " + "(" + xmax + "," + ymax + ")");
+         console.log(max);*/
+         $("#framesPerSec").text("Max = " + matrix[xmax][ymax] + " at coordinate " + "(" + xmax + "," + ymax + ")");
+         var payload = {
+          location: [xmax, ymax],
+          value: max
+         };
+         return payload;
+       }
+
+       function respondToTouch() {
+
+       }
 
       function stopImages() {
         $("#button1").text("Start");

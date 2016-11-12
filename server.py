@@ -287,6 +287,8 @@ class MyHttpHandler(httpServer.BaseHTTPRequestHandler):
             self.writeStr("<html><head><title>Not Found</title></head>")
             self.writeStr("<body><h1>Not Found</h1></body></html>")
 
+
+
 def Main(port):
     global sensor
     sensor = SensorInterface()
@@ -326,7 +328,7 @@ def Legit_Main():
 
     sensor.close()
 
-runningWeb = False
+runningWeb = True
 
 if __name__ == '__main__':
     if runningWeb:
