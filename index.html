@@ -84,7 +84,20 @@
       }
 
       function getMin(2dmatrix) {
-        
+        var x = 0;
+        var y = 0;
+        var min = Infinity;
+        for (var i = 0; i < arr.length; i++) {
+          for (var j = 0; j < arr[i].length; j++) {
+            if (arr[i][j] < min) {
+              x = i;
+              y = j;
+              min = arr[i][j];
+            }
+          }
+        }
+        console.log([x, y]);
+        return [x, y];
       }
 
       function requestUpdate() {
@@ -96,6 +109,7 @@
             //$("#rawData").text(JSON.stringify(json, null, 2));
             updateFrameRate(json["timeStamp"], json["sequence"]);
             updateCanvas(json["image"], json["rows"], json["cols"]);
+
           }
         });
       }
